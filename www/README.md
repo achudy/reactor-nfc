@@ -1,17 +1,8 @@
-# WWW
-
-### Prerequisites
-At first (press Enter to all defaults):
+# Prep
 ```
-node app.js
-```
-
-Then:
-```
-npm install express bcrypt body-parser --save
+npm i firebase-admin
+npm i express
+npm i body-parser
+npm i bcrypt
 ```
 
-### To launch the server 
-```
-node app.js
-```
