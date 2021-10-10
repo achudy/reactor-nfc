@@ -50,3 +50,4 @@ output.json
 #NDK
 obj/
 .externalNativeBuild
+google-services.json

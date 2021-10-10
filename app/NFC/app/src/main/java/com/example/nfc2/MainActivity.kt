@@ -4,11 +4,18 @@ import android.content.Context
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.pusher.client.Pusher
+import com.pusher.client.PusherOptions
+import com.pusher.client.connection.ConnectionEventListener
+import com.pusher.client.connection.ConnectionState
+import com.pusher.client.connection.ConnectionStateChange
+import com.pusher.pushnotifications.PushNotifications
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,6 +47,45 @@ class MainActivity : AppCompatActivity() {
         buttonRead.setOnClickListener {
             toast(this, NFCUtil.retrieveNFCMessage(this.intent))
         }
+
+
+        /***
+         * PUSHER
+         */
+        PushNotifications.start(this, "5741b69e-86ff-4ef7-aa96-0c5d2968a3eb");
+        PushNotifications.addDeviceInterest("hello")
+        PushNotifications.addDeviceInterest("debug-notifications")
+
+        val options = PusherOptions()
+        options.setCluster("eu");
+
+        val pusher = Pusher("2ac22b7f84ea6383f1e3", options)
+
+        pusher.connect(object : ConnectionEventListener {
+            override fun onConnectionStateChange(change: ConnectionStateChange) {
+                Log.i(
+                    "Pusher",
+                    "State changed from ${change.previousState} to ${change.currentState}"
+                )
+            }
+
+            override fun onError(
+                message: String,
+                code: String,
+                e: Exception
+            ) {
+                Log.i(
+                    "Pusher",
+                    "There was a problem connecting! code ($code), message ($message), exception($e)"
+                )
+            }
+        }, ConnectionState.ALL)
+
+        val channel = pusher.subscribe("my-channel")
+        channel.bind("my-event") { event ->
+            Log.i("Pusher", "Received event with data: $event")
+        }
+
     }
 
     override fun onNewIntent(intent: Intent?) {
