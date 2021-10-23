@@ -11,6 +11,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
+import android.util.Log
 import java.io.IOException
 
 object NFCUtil {
@@ -24,9 +25,12 @@ object NFCUtil {
             ByteArray(0),
             payload.toByteArray()
         )
+        Log.d("testing", nfcRecord.toString())
         val nfcMessage = NdefMessage(arrayOf(nfcRecord))
+        Log.d("testing", nfcMessage.toString())
         intent?.let {
             val tag = it.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
+            Log.d("testing", tag.toString())
             return writeMessageToTag(nfcMessage, tag)
         }
         return false
@@ -94,11 +98,13 @@ object NFCUtil {
 
         try {
             val nDefTag = Ndef.get(tag)
+            Log.d("testing", nDefTag.toString())
 
             nDefTag?.let {
                 it.connect()
                 if (it.maxSize < nfcMessage.toByteArray().size) {
                     //Message to large to write to NFC tag
+                    Log.d("testing", "2 lrge")
                     return false
                 }
                 return if (it.isWritable) {
@@ -108,11 +114,13 @@ object NFCUtil {
                     true
                 } else {
                     //NFC tag is read-only
+                    Log.d("testing", "READONLY!")
                     false
                 }
             }
 
             val nDefFormatableTag = NdefFormatable.get(tag)
+            Log.d("testing", nDefFormatableTag.toString())
 
             nDefFormatableTag?.let {
                 return try {
@@ -126,11 +134,13 @@ object NFCUtil {
                     false
                 }
             }
+            Log.d("testing", "NDEF NOT SUPPORTED!")
             //NDEF is not supported
             return false
 
         } catch (e: Exception) {
             //Write operation has failed
+            Log.d("testing", e.toString())
         }
         return false
     }
