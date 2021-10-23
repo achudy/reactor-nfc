@@ -65,6 +65,12 @@ function sendPushNotification(message, req, res) {
       });
 }
 
+app.post('/test', (req, res)=>{
+    res.status(200).send("success");
+    console.log("test");
+    res.end()
+})
+
 function postToNode() {
     console.log("posted");
     var xhr = new XMLHttpRequest();

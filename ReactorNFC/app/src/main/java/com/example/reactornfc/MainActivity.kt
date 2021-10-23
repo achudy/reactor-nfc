@@ -13,8 +13,11 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.github.kittinunf.fuel.httpPost
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
+
+
 
 class MainActivity : AppCompatActivity() {
     private var mNfcAdapter: NfcAdapter? = null
@@ -27,6 +30,8 @@ class MainActivity : AppCompatActivity() {
             setBackgroundColor()
             setDisplayText("Make sure\nthat the reactor\nwas activated\non the other device!")
         }
+
+
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful) {
@@ -74,6 +79,11 @@ class MainActivity : AppCompatActivity() {
             setBackgroundColor()
             setDisplayText(base)
             toast(this, base)
+            "http://192.168.0.228:3000/test".httpPost().response{
+                    request, response, result ->
+                Log.d("HttpRequest",response.responseMessage)
+                Log.d("HttpRequest",result.toString())
+            }
         }
     }
 

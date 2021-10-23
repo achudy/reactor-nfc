@@ -48,5 +48,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-core:19.0.2'
     implementation 'com.google.firebase:firebase-messaging:22.0.0'
+    implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
 }
 
