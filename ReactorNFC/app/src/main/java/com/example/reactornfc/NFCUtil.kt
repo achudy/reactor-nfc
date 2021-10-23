@@ -104,7 +104,7 @@ object NFCUtil {
                 it.connect()
                 if (it.maxSize < nfcMessage.toByteArray().size) {
                     //Message to large to write to NFC tag
-                    Log.d("testing", "2 lrge")
+                    Log.d("testing", "2 large")
                     return false
                 }
                 return if (it.isWritable) {

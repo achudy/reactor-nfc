@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">ReactorNFC</string>
-    <string name="reactor">Reactor</string>
+<!--    <string name="reactor">Reactor</string>-->
 <!--    <string name="read">Press this button to read:</string>-->
 <!--    <string name="write">Press this button to write:</string>-->
 <!--    <string name="read_nfc">Read from NFC</string>-->
 <!--    <string name="write_nfc">Write to NFC</string>-->
 <!--    <string name="input_text">Input text to send here…</string>-->
 <!--    <string name="test">test</string>-->
-<!--    <string name="msg_token_fmt" translatable="false">FCM registration Token: %s</string>-->
+    <string name="msg_token_fmt" translatable="false">FCM registration Token: %s</string>
     <string name="notification_id">default</string>
     <string name="result">Press the button\nand bring the other phone near\n to activate the\n deadly weapon of doom.</string>
     <string name="activate">REACTOR\nACTIVATION</string>

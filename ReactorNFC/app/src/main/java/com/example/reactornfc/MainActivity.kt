@@ -9,36 +9,50 @@ import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
-    var mNfcAdapter: NfcAdapter? = null
+    private var mNfcAdapter: NfcAdapter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.i(TAG, "onCreate")
         setContentView(R.layout.activity_main)
         val beamData: Button = findViewById(R.id.buttonActivate)
-        beamData.setOnClickListener(_onBeamClick)
+        beamData.setOnClickListener {
+            turnOnNfcBeam()
+            setBackgroundColor()
+            setDisplayText("Make sure\nthat the reactor\nwas activated\non the other device!")
+        }
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("Firebase log", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            val msg = getString(R.string.msg_token_fmt, token)
+            Log.d("Firebase log", msg)
+            //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+        })
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        //Log.i(TAG, "onNewIntent")
-        //setDisplayText("onNewIntent " + intent!!.action)
         if (NfcAdapter.ACTION_NDEF_DISCOVERED == intent?.action) {
-            toast(this, "Reactor activation!")
             processNFCData(intent)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        //Log.i(TAG, "onResume")
-        //setDisplayText("onResume " + intent.action)
         // Check to see that the Activity started due to an Android Beam
         if (NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action) {
             processNFCData(intent)
@@ -46,7 +60,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun processNFCData(inputIntent: Intent) {
-        //Log.i(TAG, "processNFCData")
         val rawMessages = inputIntent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
         if (rawMessages != null && rawMessages.isNotEmpty()) {
             val messages = arrayOfNulls<NdefMessage>(rawMessages.size)
@@ -54,21 +67,12 @@ class MainActivity : AppCompatActivity() {
                 messages[i] = rawMessages[i] as NdefMessage
             }
             //Log.i(TAG, "message size = " + messages.size)
-            val textView: TextView = findViewById(R.id.result)
             // only one message sent during the beam
             val msg = rawMessages[0] as NdefMessage
             // record 0 contains the MIME type, record 1 is the AAR, if present
             val base = String(msg.records[0].payload)
-//            val str = String.format(
-//                Locale.getDefault(),
-//                "Message entries=%d. Base message is %s",
-//                rawMessages.size,
-//                base
-//            )
-            val str = base
-            val layout: ConstraintLayout = findViewById(R.id.layout)
-            layout.setBackgroundColor(resources.getColor(R.color.my_purple))
-            textView.text = str
+            setBackgroundColor()
+            setDisplayText(base)
             toast(this, base)
         }
     }
@@ -78,15 +82,11 @@ class MainActivity : AppCompatActivity() {
         textView.text = text
     }
 
-    private val _onBeamClick = View.OnClickListener {
-        //Log.i(TAG, "_onBeamClick onClick")
-        turnOnNfcBeam()
+    private fun setBackgroundColor() {
+        val layout: ConstraintLayout = findViewById(R.id.layout)
+        layout.setBackgroundColor(resources.getColor(R.color.my_purple))
     }
 
-    /* **************************************************************
-        This will create the NFC Adapter, if available,
-        and setup the Callback listener when create message is needed.
-     */
     private fun turnOnNfcBeam() {
         // Check for available NFC Adapter
         if (mNfcAdapter == null) {
@@ -103,34 +103,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val _onNfcCreateCallback = CreateNdefMessageCallback {
-        Log.i(TAG, "createNdefMessage")
         createMessage()
     }
 
     private fun createMessage(): NdefMessage {
-        val text = """
-               Reactor activated
-               """.trimIndent()
-        return NdefMessage(
-            arrayOf(
-                NdefRecord.createMime(
-                    "application/com.example.reactornfc.mimetype", text.toByteArray()
-                )
-                /**
-                 * The Android Application Record (AAR) is commented out. When a device
-                 * receives a push with an AAR in it, the application specified in the AAR
-                 * is guaranteed to run. The AAR overrides the tag dispatch system.
-                 * You can add it back in to guarantee that this
-                 * activity starts when receiving a beamed message. For now, this code
-                 * uses the tag dispatch system.
-                 */
-                //NdefRecord.createApplicationRecord("com.example.reactornfc")
-            )
-        )
-    }
+        val text = "Reactor activated!".trimIndent()
+        val mimeType = "application/com.example.reactornfc.mimetype"
+        val mimeRecord = NdefRecord.createMime(mimeType, text.toByteArray())
 
-    companion object {
-        private val TAG = "NFCDEMO:" + MainActivity::class.java.simpleName
+        return NdefMessage(arrayOf(mimeRecord))
     }
 }
 
@@ -138,5 +119,5 @@ class MainActivity : AppCompatActivity() {
 fun toast(context: Context, message: CharSequence) =
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
-fun <T> Boolean.ifElse(primaryResult: T, secondaryResult: T) =
-    if (this) primaryResult else secondaryResult
+//fun <T> Boolean.ifElse(primaryResult: T, secondaryResult: T) =
+//    if (this) primaryResult else secondaryResult
