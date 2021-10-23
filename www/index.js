@@ -71,17 +71,17 @@ app.post('/test', (req, res)=>{
     res.end()
 })
 
-function postToNode() {
-    console.log("posted");
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/firebase/notification", true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send();
-    xhr.onload = function() {
-        var data = JSON.parse(this.responseText);
-        console.log(data);
-    };
-}
+// function postToNode() {
+//     console.log("posted");
+//     var xhr = new XMLHttpRequest();
+//     xhr.open("POST", "/firebase/notification", true);
+//     xhr.setRequestHeader('Content-Type', 'application/json');
+//     xhr.send();
+//     xhr.onload = function() {
+//         var data = JSON.parse(this.responseText);
+//         console.log(data);
+//     };
+// }
 
 //WWW part
 
