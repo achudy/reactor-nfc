@@ -6,16 +6,14 @@ import android.nfc.NdefMessage
 import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
-import android.nfc.NfcEvent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Parcelable
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import java.util.*
+import androidx.constraintlayout.widget.ConstraintLayout
 
 class MainActivity : AppCompatActivity() {
     var mNfcAdapter: NfcAdapter? = null
@@ -23,23 +21,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Log.i(TAG, "onCreate")
         setContentView(R.layout.activity_main)
-        val beamData: Button = findViewById(R.id.buttonWrite)
+        val beamData: Button = findViewById(R.id.buttonActivate)
         beamData.setOnClickListener(_onBeamClick)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.i(TAG, "onNewIntent")
-        setDisplayText("onNewIntent " + intent!!.action)
-        if (NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action) {
+        //Log.i(TAG, "onNewIntent")
+        //setDisplayText("onNewIntent " + intent!!.action)
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED == intent?.action) {
+            toast(this, "Reactor activation!")
             processNFCData(intent)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        Log.i(TAG, "onResume")
-        setDisplayText("onResume " + intent.action)
+        //Log.i(TAG, "onResume")
+        //setDisplayText("onResume " + intent.action)
         // Check to see that the Activity started due to an Android Beam
         if (NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action) {
             processNFCData(intent)
@@ -47,40 +46,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun processNFCData(inputIntent: Intent) {
-        Log.i(TAG, "processNFCData")
+        //Log.i(TAG, "processNFCData")
         val rawMessages = inputIntent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
-        if (rawMessages != null && rawMessages.size > 0) {
+        if (rawMessages != null && rawMessages.isNotEmpty()) {
             val messages = arrayOfNulls<NdefMessage>(rawMessages.size)
             for (i in rawMessages.indices) {
                 messages[i] = rawMessages[i] as NdefMessage
             }
-            Log.i(TAG, "message size = " + messages.size)
-            val veiw: TextView = findViewById(R.id.result)
-            if (veiw != null) {
-                // only one message sent during the beam
-                val msg = rawMessages[0] as NdefMessage
-                // record 0 contains the MIME type, record 1 is the AAR, if present
-                val base = String(msg.records[0].payload)
-                val str = String.format(
-                    Locale.getDefault(),
-                    "Message entries=%d. Base message is %s",
-                    rawMessages.size,
-                    base
-                )
-                veiw.text = str
-            }
+            //Log.i(TAG, "message size = " + messages.size)
+            val textView: TextView = findViewById(R.id.result)
+            // only one message sent during the beam
+            val msg = rawMessages[0] as NdefMessage
+            // record 0 contains the MIME type, record 1 is the AAR, if present
+            val base = String(msg.records[0].payload)
+//            val str = String.format(
+//                Locale.getDefault(),
+//                "Message entries=%d. Base message is %s",
+//                rawMessages.size,
+//                base
+//            )
+            val str = base
+            val layout: ConstraintLayout = findViewById(R.id.layout)
+            layout.setBackgroundColor(resources.getColor(R.color.my_purple))
+            textView.text = str
+            toast(this, base)
         }
     }
 
     private fun setDisplayText(text: String) {
-        val veiw: TextView = findViewById(R.id.result)
-        if (veiw != null) {
-            veiw.text = text
-        }
+        val textView: TextView = findViewById(R.id.result)
+        textView.text = text
     }
 
     private val _onBeamClick = View.OnClickListener {
-        Log.i(TAG, "_onBeamClick onClick")
+        //Log.i(TAG, "_onBeamClick onClick")
         turnOnNfcBeam()
     }
 
@@ -110,9 +109,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun createMessage(): NdefMessage {
         val text = """
-               Hello there from another device!
-               
-               Beam Time: ${System.currentTimeMillis()}
+               Reactor activated
                """.trimIndent()
         return NdefMessage(
             arrayOf(
