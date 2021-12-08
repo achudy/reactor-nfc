@@ -1,0 +1,13 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:com.example.reactornfc////PointingToDeclaration/app/com.example.reactornfc/index.html
+$dokka.location:com.example.reactornfc/MainActivity///PointingToDeclaration/app/com.example.reactornfc/-main-activity/index.html
+$dokka.location:com.example.reactornfc/MainActivity/MainActivity/#/PointingToDeclaration/app/com.example.reactornfc/-main-activity/-main-activity.html
+$dokka.location:com.example.reactornfc/MainActivityKt///PointingToDeclaration/app/com.example.reactornfc/-main-activity-kt/index.html
+$dokka.location:com.example.reactornfc/MainActivityKt/httpPost/#kotlin.String/PointingToDeclaration/app/com.example.reactornfc/-main-activity-kt/http-post.html
+$dokka.location:com.example.reactornfc/MainActivityKt/toast/#android.content.Context#kotlin.CharSequence/PointingToDeclaration/app/com.example.reactornfc/-main-activity-kt/toast.html
+$dokka.location:com.example.reactornfc/MyFirebaseMessagingService///PointingToDeclaration/app/com.example.reactornfc/-my-firebase-messaging-service/index.html
+$dokka.location:com.example.reactornfc/MyFirebaseMessagingService/MyFirebaseMessagingService/#/PointingToDeclaration/app/com.example.reactornfc/-my-firebase-messaging-service/-my-firebase-messaging-service.html
+$dokka.location:com.example.reactornfc/MyFirebaseMessagingService/onMessageReceived/#com.google.firebase.messaging.RemoteMessage/PointingToDeclaration/app/com.example.reactornfc/-my-firebase-messaging-service/on-message-received.html
+com.example.reactornfc
+

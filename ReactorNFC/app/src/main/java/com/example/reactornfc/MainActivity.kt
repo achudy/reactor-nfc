@@ -9,46 +9,73 @@ import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
+import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.httpPost
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.android.synthetic.main.activity_main.*
 
-
-
+/**
+ * The main activity with all the logic.
+ */
 class MainActivity : AppCompatActivity() {
+
+    /**
+     * NFC needs to be initiated
+     */
     private var mNfcAdapter: NfcAdapter? = null
+
+    /**
+     * The main function of an Android activity
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val beamData: Button = findViewById(R.id.buttonActivate)
-        beamData.setOnClickListener {
+
+        /**
+         * Logic for turning NFC on and signifying that tu the user.
+         */
+        buttonActivate.setOnClickListener {
             turnOnNfcBeam()
             setBackgroundColor()
             setDisplayText("Make sure\nthat the reactor\nwas activated\non the other device!")
         }
 
-
-
+        /**
+         * For working with notifications - the app needs a Firebase connection.
+         */
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            /**
+             * Check the Firebase connection
+             */
             if (!task.isSuccessful) {
-                Log.w("Firebase log", "Fetching FCM registration token failed", task.exception)
+                Log.w("Firebase", "Fetching FCM registration token failed", task.exception)
                 return@OnCompleteListener
             }
 
-            // Get new FCM registration token
+            /**
+             * Obtain the token
+             */
             val token = task.result
+            Log.d("Firebase", token.toString())
 
-            // Log and toast
-            val msg = getString(R.string.msg_token_fmt, token)
-            Log.d("Firebase log", msg)
-            //Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+            /**
+             * Send the token to the web server.
+             */
+            val bodyJson = """{"token" : "$token"}"""
+            "http://192.168.0.228:3000/token".httpPost().jsonBody(bodyJson)
+                .response { request, response, result ->
+                    Log.d("HttpRequest", request.toString())
+                    Log.d("HttpRequest", response.toString())
+                }
         })
     }
 
+    /**
+     * A new intent needs to be processed.
+     */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (NfcAdapter.ACTION_NDEF_DISCOVERED == intent?.action) {
@@ -56,14 +83,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * A new intent needs to be processed.
+     */
     override fun onResume() {
         super.onResume()
-        // Check to see that the Activity started due to an Android Beam
         if (NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action) {
             processNFCData(intent)
         }
     }
 
+    /**
+     * Take the input and get the text message from the NFC message.
+     */
     private fun processNFCData(inputIntent: Intent) {
         val rawMessages = inputIntent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
         if (rawMessages != null && rawMessages.isNotEmpty()) {
@@ -71,51 +103,55 @@ class MainActivity : AppCompatActivity() {
             for (i in rawMessages.indices) {
                 messages[i] = rawMessages[i] as NdefMessage
             }
-            //Log.i(TAG, "message size = " + messages.size)
-            // only one message sent during the beam
             val msg = rawMessages[0] as NdefMessage
-            // record 0 contains the MIME type, record 1 is the AAR, if present
-            val base = String(msg.records[0].payload)
+            val msgText = String(msg.records[0].payload)
             setBackgroundColor()
-            setDisplayText(base)
-            toast(this, base)
-            "http://192.168.0.228:3000/test".httpPost().response{
-                    request, response, result ->
-                Log.d("HttpRequest",response.responseMessage)
-                Log.d("HttpRequest",result.toString())
-            }
+            setDisplayText(msgText)
+            toast(this, msgText)
+            httpPost("test")
         }
     }
 
+    /**
+     * A function for setting a string in a textview.
+     */
     private fun setDisplayText(text: String) {
         val textView: TextView = findViewById(R.id.result)
         textView.text = text
     }
 
+    /**
+     * Background change.
+     */
     private fun setBackgroundColor() {
-        val layout: ConstraintLayout = findViewById(R.id.layout)
         layout.setBackgroundColor(resources.getColor(R.color.my_purple))
     }
 
+    /**
+     * Turning on the adapter.
+     */
     private fun turnOnNfcBeam() {
-        // Check for available NFC Adapter
         if (mNfcAdapter == null) {
             mNfcAdapter = NfcAdapter.getDefaultAdapter(this)
         }
         if (mNfcAdapter == null || !mNfcAdapter!!.isEnabled) {
             mNfcAdapter = null
-            Toast.makeText(this, "NFC is not available", Toast.LENGTH_LONG).show()
+            toast(this, "NFC is not available")
             return
         }
-
-        // Register callback
         mNfcAdapter!!.setNdefPushMessageCallback(_onNfcCreateCallback, this)
     }
 
+    /**
+     * Creating a message in a callback.
+     */
     private val _onNfcCreateCallback = CreateNdefMessageCallback {
         createMessage()
     }
 
+    /**
+     * Create an NdefMessage.
+     */
     private fun createMessage(): NdefMessage {
         val text = "Reactor activated!".trimIndent()
         val mimeType = "application/com.example.reactornfc.mimetype"
@@ -125,9 +161,18 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-
+/**
+ * Simple toast making function.
+ */
 fun toast(context: Context, message: CharSequence) =
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
-//fun <T> Boolean.ifElse(primaryResult: T, secondaryResult: T) =
-//    if (this) primaryResult else secondaryResult
+/**
+ * Http POST - a reoccuring message to the www server.
+ */
+fun httpPost(url: String) {
+    "http://192.168.0.228:3000/$url".httpPost().response { request, response, result ->
+        Log.d("HttpRequest", response.responseMessage)
+        Log.d("HttpRequest", result.toString())
+    }
+}

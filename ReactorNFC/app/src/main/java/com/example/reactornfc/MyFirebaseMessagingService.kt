@@ -13,27 +13,45 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat.VISIBILITY_PRIVATE
 
 
+/**
+ * A generic Firebase messaging service.
+ */
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
+    /**
+     * Message receival override.
+     */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         val CHANNEL_ID = "com.example.reactornfc.channel_id"
 
+        /**
+         * Fail on unsupported versions.
+         */
         if (Build.VERSION.SDK_INT >= 26) {
             val channel =
                 NotificationChannel(CHANNEL_ID, "Channel Name", NotificationManager.IMPORTANCE_HIGH)
             NotificationManagerCompat.from(this).createNotificationChannel(channel)
         }
 
+        /**
+         * Making the Intent that should spawn from the notification.
+         */
         val notificationIntent = Intent("android.intent.category.LAUNCHER")
         notificationIntent.setClassName(
-            "com.example.test",
-            "com.example.test.VideoActivity"
+            "com.example.reactornfc",
+            "com.example.reactornfc.MainActivity"
         )
         notificationIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
+        /**
+         * Activity for the pending intent.
+         */
         val contentIntent = PendingIntent.getActivity(applicationContext, 0, notificationIntent, 0)
 
+        /**
+         * Building the notification itself.
+         */
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(remoteMessage.notification!!.title)
             .setContentText(remoteMessage.notification!!.body)
