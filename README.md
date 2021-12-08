@@ -1,5 +1,10 @@
 # Reactor NFC
-A project for mobile NFC authentication
-Node and Kotlin Android app.
+Projekt, którego celem jest autoryzacja przy użyciu technologii NFC.
 
-[Mobile app documentation](https://achudy.github.io/reactor-nfc/index.html)
+Zasymulowano scenariusz, gdzie teoretyczny reaktor wymaga potwierdzenia jego aktywacji na dwóch urządzeniach.
+
+Przez zbliżenie dwóch telefonów wykorzystując NFC potwierdzane jest wykonanie akcji.
+
+[Dokumentacja kodu apliacji mobilnej](https://achudy.github.io/reactor-nfc/index.html)
+
+[Dokumentacja aplikacji nodeJS](https://github.com/achudy/reactor-nfc/blob/main/www/README.md)
